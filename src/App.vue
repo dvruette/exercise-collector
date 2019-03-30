@@ -1,29 +1,122 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <top-nav id="nav" />
+    <router-view id="view" />
   </div>
 </template>
 
+<script lang="ts">
+import { Vue, Component } from 'vue-property-decorator'
+import Nav from '@/components/Nav.vue'
+
+@Component({
+  components: { 'top-nav': Nav }
+})
+export default class App extends Vue {}
+</script>
+
+
 <style lang="scss">
+$green: rgb(28, 150, 75);
+$orange: rgb(235, 152, 44);
+$dark: #2c3e50;
+$link-color: #178352;
+
+body {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-height: 100vh;
+}
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  color: $dark;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+
+#view {
+  position: absolute;
+  width: 100%;
+}
+
+p, h1, h2, h3, h4 {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: $link-color;
+  border-bottom: 1px solid rgba(29, 204, 116, 0);
+  cursor: pointer;
+  transition: .4s ease;
+  
+  &:hover {
+    border-bottom-color: $link-color;
   }
 }
+
+.badge {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    vertical-align: middle;
+
+    border-radius: 4px;
+    padding: 1px 4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: .3s ease;
+
+    &.green {
+        background-color: $green;
+        color: white;
+    }
+
+    &.orange {
+        background-color: $orange;
+        color: white;
+    }
+}
+
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: -1;
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .3s ease;
+    pointer-events: none;
+
+    .popup-container {
+      background-color: white;
+      border-radius: 4px;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+      padding: 24px;
+      cursor: default;
+      transform: translateY(-80px);
+      transition: .3s ease;
+    }
+
+    &.show {
+      z-index: 100;
+      opacity: 1;
+      pointer-events: all;
+
+      .popup-container {
+        transform: none;
+      }
+    }
+}
+
 </style>
