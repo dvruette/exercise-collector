@@ -9,7 +9,7 @@
                     </a>
                 </h2>
                 <div class="counter" :class="{ done: allDone }">
-                    <span v-if="allDone" class="emoji">🎉</span>
+                    <span v-if="allDone" class="emoji">{{ successEmoji }}</span>
                     <span v-else>{{ toDoSheets.length }}</span>
                 </div>
             </div>
@@ -53,8 +53,13 @@ export default class Home extends Vue {
     hideFinished: boolean = false
     hideAll: boolean = false
 
+    successEmoji: string = '🎉'
+
     constructor() {
         super()
+
+        const emoji = window.localStorage.getItem('exerciseEmoji')
+        if (emoji) this.successEmoji = emoji
     }
 
     beforeMount() {
