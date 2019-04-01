@@ -37,8 +37,6 @@ export default class Home extends Vue {
 
     constructor() {
         super()
-        this.$store.commit('incrementTotalTasks')
-        if (this.sheet.done) this.$store.commit('incrementDoneTasks')
     }
 
     format(date: Date): string {
@@ -57,10 +55,9 @@ export default class Home extends Vue {
 
     setDone(done: boolean): void {
         if (this.sheet.done != done) {
-            this.$store.commit(done ? 'incrementDoneTasks' : 'decrementDoneTasks')
-        } 
-        this.sheet.done = done
-        this.$emit('change')
+            this.sheet.done = done
+            this.$emit('change')
+        }
     }
 
 }
@@ -74,7 +71,9 @@ h3 {
 }
 
 .row {
-    justify-content: space-between;
+    &.between {
+        justify-content: space-between;
+    }
 
     & > :not(:last-child) {
         margin-right: 16px;

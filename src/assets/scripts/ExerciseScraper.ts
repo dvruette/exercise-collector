@@ -21,9 +21,7 @@ export default class ExerciseScraper extends Scraper {
         }
 
         // evaluate correct base URL to append to PDF-links
-        let base = ''
-        if (this.baseUrl.endsWith('index.html')) base = this.baseUrl.replace('index.html', '')
-        if (this.baseUrl.endsWith('index.php')) base = this.baseUrl.replace('index.php', '')
+        const base = this.config.baseUrl ? this.config.baseUrl : ''
 
         // iterate over all tables containing exercises
         let query = doc.querySelectorAll('table')
@@ -43,10 +41,10 @@ export default class ExerciseScraper extends Scraper {
                     ? cells[config.dateCellIndex].innerText
                     : ''
                 const dueDate = dateString ? moment(dateString, config.dateFormat).toDate() : null
-                const pdfUrl = links.length > config.pdfLinkIndex
+                const pdfUrl = links.length > config.pdfLinkIndex && config.pdfLinkIndex >= 0
                     ? base + links[config.pdfLinkIndex].getAttribute('href')
                     : ''
-                const solutionUrl = links.length > config.solutionLinkIndex
+                const solutionUrl = links.length > config.solutionLinkIndex && config.solutionLinkIndex >= 0
                     ? base + links[config.solutionLinkIndex].getAttribute('href')
                     : ''
 
@@ -56,7 +54,8 @@ export default class ExerciseScraper extends Scraper {
                     solutionUrl,
                     dueDate
                 })
-                exercise.sheets.push(sheet)
+                
+                if (pdfUrl) exercise.sheets.push(sheet)
             })
         }
         

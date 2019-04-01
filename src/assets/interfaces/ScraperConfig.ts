@@ -2,6 +2,7 @@
 
 export default interface ScraperConfig {
     url: string
+    baseUrl?: string
     name: string
     tableConfigs: {
         index: number

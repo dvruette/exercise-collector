@@ -9,7 +9,7 @@
                     </a>
                 </h2>
                 <div class="counter" :class="{ done: allDone }">
-                    <span v-if="allDone" class="emoji">🎉</span>
+                    <span v-if="allDone" class="emoji">{{ successEmoji }}</span>
                     <span v-else>{{ toDoSheets.length }}</span>
                 </div>
             </div>
@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <transition-group name="list" tag="ul" class="sheet-list" v-if="toDoSheets.length || doneSheets.length">
+        <transition-group name="list" tag="ul" class="sheet-list" v-if="!hideAll && (toDoSheets.length || doneSheets.length)">
             <li v-for="sheet in toDoSheets" :key="sheet.title">
                 <sheet-component :sheet="sheet" @change="sheetChanged(sheet)" />
             </li>
@@ -53,8 +53,17 @@ export default class Home extends Vue {
     hideFinished: boolean = false
     hideAll: boolean = false
 
+    successEmoji: string = '🎉'
+
     constructor() {
         super()
+        for (let sheet of this.exercise.sheets) {
+            if (sheet.done) this.$store.commit('incrementDoneTasks')
+            this.$store.commit('incrementTotalTasks')
+        }
+
+        const emoji = window.localStorage.getItem('exerciseEmoji')
+        if (emoji) this.successEmoji = emoji
     }
 
     beforeMount() {
@@ -66,7 +75,7 @@ export default class Home extends Vue {
     }
 
     get toDoSheets(): Sheet[] {
-        return this.exercise.sheets.filter(sheet => !sheet.done && !this.hideAll)
+        return this.exercise.sheets.filter(sheet => !sheet.done)
     }
 
     get allDone(): boolean {
@@ -83,6 +92,8 @@ export default class Home extends Vue {
     }
 
     sheetChanged(sheet: Sheet) {
+        if (sheet.done) this.$store.commit('incrementDoneTasks')
+        else this.$store.commit('decrementDoneTasks')
         this.$emit('save')
     }
 
@@ -126,7 +137,8 @@ $orange: rgb(255, 198, 40);
     padding: 24px;
     border-radius: 5px;
     box-shadow: 0 4px 12px 0px rgba(0, 0, 0, 0.15);
-    height: fit-content;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header {
@@ -149,7 +161,11 @@ $orange: rgb(255, 198, 40);
             height: 24px;
         }
         path {
+            transition: .3s ease;
             fill: rgba($dark, 0.5);
+        }
+        &:hover path {
+            fill: rgba($dark, 0.7);
         }
     }
 
@@ -183,7 +199,8 @@ $orange: rgb(255, 198, 40);
 
         .emoji {
             position: relative;
-            left: 2px;
+            top: -1px;
+            left: 1px;
         }
         :not(.emoji) {
             font-size: 24px;

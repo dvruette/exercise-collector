@@ -1,16 +1,20 @@
 <template>
   <div id="app">
     <top-nav id="nav" />
-    <router-view id="view" />
+    <div id="view">
+      <router-view id="router" />
+      <main-footer id="footer" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import Nav from '@/components/Nav.vue'
+import Footer from '@/components/Footer.vue'
 
 @Component({
-  components: { 'top-nav': Nav }
+  components: { 'top-nav': Nav, 'main-footer': Footer }
 })
 export default class App extends Vue {}
 </script>
@@ -36,11 +40,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: $dark;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 #view {
-  position: absolute;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  #router {
+    flex: 1;
+  }
 }
 
 p, h1, h2, h3, h4 {
@@ -63,7 +77,7 @@ a {
     display: inline-block;
     font-size: 14px;
     font-weight: bold;
-    vertical-align: middle;
+    white-space: nowrap;
 
     border-radius: 4px;
     padding: 1px 4px 0;

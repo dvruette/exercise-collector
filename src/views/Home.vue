@@ -94,11 +94,11 @@ $dark: #2c3e50;
 
   grid-template-columns: repeat(1, 1fr);
 
-  @media (min-width: 700px) {
+  @media (min-width: 760px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 1070px) {
     grid-template-columns: repeat(3, 1fr);
   }
 
@@ -122,13 +122,21 @@ $dark: #2c3e50;
     bottom: 0;
     display: flex;
     align-items: center;
+    background: rgba(white, 0.8);
+
+    border-radius: 100px;
+    // padding: 8px 8px 8px 12px;
+    // box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.15);
+    // border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 8px 8px rgba(white, 0.8);
 
     h4 {
       margin-right: 16px;
-      color: black;
+      color: rgb(128, 128, 128);
     }
 
     img {
+      opacity: 0.5;
       display: block;
       width: 40px;
       height: 40px;
@@ -139,7 +147,7 @@ $dark: #2c3e50;
 
 .spinner.show {
   z-index: 10;
-  opacity: 0.5;
+  opacity: 1;
 }
 
 @keyframes Spin {
