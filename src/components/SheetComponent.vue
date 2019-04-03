@@ -49,7 +49,7 @@ export default class Home extends Vue {
         } else if (diff < 0) {
             return moment(date).format('D.M.YYYY')
         } else {
-            return moment(date).format('dddd') + ' (' + moment().to(date) + ')'
+            return moment(date).format('dddd') + ' (in ' + (diff + 1) + ' days)'
         }
     }
 
