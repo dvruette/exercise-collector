@@ -73,6 +73,14 @@ a {
   }
 }
 
+input {
+  box-sizing: border-box;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(black, 0.2);
+}
+
 .badge {
     display: inline-block;
     font-size: 14px;
@@ -114,6 +122,10 @@ a {
 
     .popup-container {
       background-color: white;
+      max-width: 860px;
+      margin: 32px;
+      padding: 24px;
+      border-radius: 4px;
       border-radius: 4px;
       border-bottom: 2px solid rgba(0, 0, 0, 0.2);
       padding: 24px;

@@ -13,19 +13,21 @@ export default class ExerciseScraper extends Scraper {
         this.baseUrl = config.url
     }
 
-    scrape(doc: Document): Exercise {
+    scrape(doc: Document, conf?: ScraperConfig | undefined): Exercise {
+        conf = conf || this.config
+
         const exercise: Exercise = {
-            name: this.config.name,
-            url: this.baseUrl,
+            name: conf.name,
+            url: conf.url,
             sheets: []
         }
 
         // evaluate correct base URL to append to PDF-links
-        const base = this.config.baseUrl ? this.config.baseUrl : ''
+        const base = conf.baseUrl ? conf.baseUrl : ''
 
         // iterate over all tables containing exercises
         let query = doc.querySelectorAll('table')
-        for (let config of this.config.tableConfigs) {
+        for (let config of conf.tableConfigs) {
 
             // iterate over all rows, fetching a sheet for each one
             query[config.index].querySelectorAll('tr').forEach((row, index) => {
@@ -34,8 +36,8 @@ export default class ExerciseScraper extends Scraper {
                 const cells = row.querySelectorAll('td')
                 const links = row.querySelectorAll('a')
 
-                const title = config.titleCellIndex >= 0 ?
-                    cells[config.titleCellIndex].innerText
+                const title = config.titleCellIndex >= 0
+                    ? cells[config.titleCellIndex].innerText
                     : 'Exercise ' + index
                 const dateString = config.dateCellIndex >= 0
                     ? cells[config.dateCellIndex].innerText

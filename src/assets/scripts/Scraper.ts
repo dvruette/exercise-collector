@@ -1,5 +1,6 @@
 
 import Exercise from '@/assets/interfaces/Exercise'
+import ScraperConfig from '../interfaces/ScraperConfig';
 
 export default abstract class Scraper {
     static proxyUrl: string = "https://cors-anywhere.herokuapp.com/"
@@ -7,7 +8,7 @@ export default abstract class Scraper {
 
     load(): Promise<Exercise> {
         return new Promise((resolve, reject) => {
-            this.fetch(this.baseUrl)
+            Scraper.fetch(this.baseUrl)
             .then(doc => {
                 if (doc) resolve(this.scrape(doc))
                 else reject(new Error('Document could not be loaded: ' + this.baseUrl))
@@ -16,7 +17,7 @@ export default abstract class Scraper {
         })
     }
 
-    fetch(url: string): Promise<Document> {
+    static fetch(url: string): Promise<Document> {
         return new Promise<Document>((resolve, reject) => {
             const xhr = new XMLHttpRequest()
 
@@ -34,5 +35,5 @@ export default abstract class Scraper {
         })
     }
 
-    abstract scrape(doc: Document): Exercise;
+    abstract scrape(doc: Document, config?: ScraperConfig | undefined): Exercise;
 }

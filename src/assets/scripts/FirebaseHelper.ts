@@ -25,7 +25,6 @@ export default class FirebaseHelper {
                     createdAt: data.createdAt.toDate(),
                     config: data.config
                 }
-                console.log(config.createdAt, data.createdAt)
                 query.push(config)
             })
             return query

@@ -15,10 +15,8 @@
 
         <settings :show="showSettings" @hide="showSettings = false" />
 
-        <div class="popup" :class="{ show: showConfigEditor }" @click="showConfigEditor = false">
-            <div class="popup-container" @click="e => { e.stopPropagation() }">
-                <config-editor @close="showConfigEditor = false" />
-            </div>
+        <div class="editor popup" :class="{ show: showConfigEditor }">
+            <config-editor class="popup-container" @close="showConfigEditor = false" />
         </div>
     </nav>
 </template>
@@ -77,6 +75,10 @@ nav {
 
 a {
     border-bottom: none;
+}
+
+.editor.popup {
+    cursor: default;
 }
 
 </style>

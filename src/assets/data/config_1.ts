@@ -28,6 +28,7 @@ const config: ScraperConfig[] = [
 
     {
         url: 'https://www.sri.inf.ethz.ch/teaching/pp2019',
+        baseUrl: '',
         name: 'Parallel Programming',
         tableConfigs: [
             {
@@ -44,6 +45,7 @@ const config: ScraperConfig[] = [
 
     {
         url: 'https://metaphor.ethz.ch/x/2019/fs/401-0212-16L/',
+        baseUrl: '',
         name: 'Analysis I',
         tableConfigs: [
             {

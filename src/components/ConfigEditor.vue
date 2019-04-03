@@ -1,28 +1,40 @@
 <template>
     <div class="config-editor">
-        <h3>Configure a new exercise</h3>
+        <div class="close-button">
+            <!-- TODO: add icon -->
+            <button @click="$emit('close')">X</button>
+        </div>
 
-        <div v-if="!tab || tab == 'start'">
-            <form class="url-input" @submit.prevent="queryConfigs">
+        <h3 class="title">Configure a new exercise</h3>
+
+        <div v-if="tab == 'teaser'">
+            <p>Coming soon...</p>
+        </div>
+
+        <div v-if="!tab || tab == 'start'" class="start">
+            <form class="url-input" @submit.prevent="queryConfigsAndLoad">
                 <label for="exercise-url">Enter a link to the desired lecture-website below:</label>
-                <br>
                 <input id="exercise-url"
                     v-model="exerciseUrl"
-                    @change="queryConfigs"
+                    @change="queryConfigsAndLoad"
                     type="url"
                     placeholder="https://lecture.ethz.ch">
                 
                 <p class="error" v-if="firebaseError">{{ firebaseError }}</p>
+                <p class="error" v-if="scraperError">{{ scraperError }}</p>
             </form>
 
             <!-- TODO: add loading indicator -->
 
-            <div v-if="queryCompleted">
+            <div v-if="queryCompleted" class="query-completed">
                 <div v-if="queriedConfigs.length">
+                    <p>There already exist configurations for this website:</p>
+
                     <ul class="config-list">
                         <li v-for="doc in queriedConfigs" :key="doc.id" class="config">
                             <p>{{ doc.config.name }} ({{ format(doc.createdAt) }})</p>
-                            <button>'plus-icon'</button>
+                            <!-- TODO: add icon -->
+                            <button @click="addConfig(doc.config)">'plus-icon'</button>
                         </li>
 
                     </ul>
@@ -45,47 +57,28 @@
             </div>
         </div>
 
-        <div v-else-if="tab == 'config-editor'">
-            <div>
-                <a @click="editor = 'form'">Form</a>
-                <a @click="editor = 'json'">JSON editor</a>
-            </div>
-
-            <div v-if="editor == 'form'">
-                <!-- TODO: add form -->
-                <p>This form is yet to be added.</p>
-            </div>
-
-            <div v-else>
-                <textarea v-model="configJsonString" @change="parseConfigString"></textarea>
-                <p class="error" v-if="jsonError">{{ jsonError }}</p>
-                <p class="error" v-if="scraperError">{{ scraperError }}</p>
-            </div>
+        <div v-else-if="tab == 'config-editor'" class="editor-tab">
+            <config-form
+                v-model="config"
+                :dom="exerciseDom"
+                :scraper="exerciseScraper" />
+            
+            <p>
+                Once everything looks to your likings, press 'all good' to save the config.
+                Also make sure that the links work, the are tricky sometimes.
+            </p>
 
             <div class="row">
                 <button @click="tab = 'start'">Back</button>
-                <button @click="scrapeAndContinue">Continue</button>
-            </div>
-        </div>
-
-        <div v-else-if="tab == 'confirm'">
-            <!-- TODO: add loading indicator -->
-            <p>This is how the collected exercises are going to look like.
-                Does everything seem good? If not, go back and change the configuration.</p>
-            <exercise-card v-if="exercise" :exercise="exercise" />
-
-            <div class="row">
-                <button @click="tab = 'config-editor'">Go back</button>
                 <button @click="saveConfig">All good</button>
             </div>
-
-            <p class="error" v-if="firebaseError">{{ firebaseError }}</p>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Vue, Prop, Watch, Component } from 'vue-property-decorator'
+import ConfigForm from './ConfigForm.vue'
 import ExerciseCard from './ExerciseCard.vue'
 import Exercise from '@/assets/interfaces/Exercise'
 import ScraperConfig from '@/assets/interfaces/ScraperConfig'
@@ -94,69 +87,49 @@ import ExerciseScraper from '@/assets/scripts/ExerciseScraper'
 import moment from 'moment'
 
 @Component({
-    components: { ExerciseCard }
+    components: { ConfigForm, ExerciseCard }
 })
 export default class ConfigEditor extends Vue {
     exerciseUrl: string = ''
+    exerciseDom: Document | null = null
+    exerciseScraper: ExerciseScraper
+    exercise: Exercise | null = null
+
     queryCompleted: boolean = false
     queriedConfigs: any = []
 
-    tab: string = ''
-    editor: string = 'json'
-
-    configJsonString: string = ''
+    tab: string = 'teaser'
 
     config: ScraperConfig = {
-        name: '',
+        name: 'Placeholder',
         url: '',
         baseUrl: '',
         tableConfigs: [{
             index: 0,
             skipFirstNRows: 1,
             titleCellIndex: 0,
-            dateCellIndex: 1,
+            dateCellIndex: -1,
             dateFormat: 'DD.MM.YYYY',
             pdfLinkIndex: 0,
             solutionLinkIndex: 1
         }]
     }
     scraperError: string = ''
-    jsonError: string = ''
     firebaseError: string = ''
 
-    exercise: Exercise | null = null
-    
     constructor() {
         super()
-    }
-
-    created() {
-        console.log('hi')
-        this.stringifyConfig()
-        console.log(this.configJsonString)
+        this.exerciseScraper = new ExerciseScraper(this.config)
     }
 
     format(date: Date): string {
         return moment(date).format('M.D.YYYY')
     }
-    
-    stringifyConfig() {
-        this.configJsonString = JSON.stringify(this.config, null, 2)
-    }
 
-    parseConfigString() {
-        this.jsonError = ''
-        try {
-            this.config = JSON.parse(this.configJsonString)
-        } catch (error) {
-            this.jsonError = error.message
-        }
-    }
-
-    queryConfigs() {
+    queryConfigsAndLoad() {
         this.firebaseError = ''
+        this.scraperError = ''
         this.config.url = this.exerciseUrl
-        this.stringifyConfig()
 
         if (this.exerciseUrl) {
             // query firebase for existing configs
@@ -166,8 +139,19 @@ export default class ConfigEditor extends Vue {
                 this.queryCompleted = true
             })
             .catch(error => {
-                this.firebaseError = `Could not connect to the database.
-                    Please try again later or open an issue if the problem persists.`
+                this.firebaseError = 'Could not connect to the database. ' +
+                'Please try again later or open an issue if the problem persists.'
+                console.error(error)
+            })
+
+            ExerciseScraper.fetch(this.exerciseUrl)
+            .then(doc => {
+                this.exerciseDom = doc
+                this.exercise = this.exerciseScraper.scrape(doc, this.config)
+            })
+            .catch(error => {
+                this.scraperError = 'Unable to load the provided URL. ' +
+                    'Please review it and make sure that you\'re connected to the internet.'
                 console.error(error)
             })
         } else {
@@ -176,50 +160,85 @@ export default class ConfigEditor extends Vue {
         }
     }
 
-    scrapeAndContinue() {
-        this.parseConfigString()
-        this.exercise = null
-        // scrape exercises with provided configuration
-        const scraper = new ExerciseScraper(this.config)
-        try {
-            scraper.load()
-            .then(exercise => {
-                this.exercise = exercise
-                this.tab = 'confirm'
-            })
-        } catch (error) {
-            this.scraperError = `Something went wrong while trying to load the provieded configuration.
-                Please make sure you entered the correct URL and you're connected to the internet.`
-        }
-
-    }
-
     saveConfig() {
         this.firebaseError = ''
+        if (!confirm('Is everything working as it should? ' +
+            'This config will be stored on a server for others to use as well.')) return
+        
         // upload config to firebase
         FirebaseHelper.uploadConfig(this.config)
         .then(doc => {})
         .catch(error => {
-            this.firebaseError = `Could not connect to the database.
-                Please try again later or open an issue if the problem persists.`
+            this.firebaseError = 'Could not connect to the database. ' +
+                'Please try again later or open an issue if the problem persists.'
             console.error(error)
         })
         .finally(() => {
             // add config to local storage
-            const configString = window.localStorage.getItem('configs')
-            const configs: ScraperConfig[] = configString ? JSON.parse(configString) : []
-            configs.push(this.config)
-            window.localStorage.setItem('configs', JSON.stringify(configs))
-
-            // then refresh to load all new sheets
-            window.location = window.location
+            this.addConfig(this.config)
         })
-        
+    }
+
+    addConfig(config: ScraperConfig): void {
+        const configString = window.localStorage.getItem('configs')
+        const configs: ScraperConfig[] = configString ? JSON.parse(configString) : []
+
+        configs.push(config)
+        window.localStorage.setItem('configs', JSON.stringify(configs))
+
+        // then refresh to load all new sheets
+        window.location = window.location
     }
 }
 </script>
 
 <style lang="scss" scoped>
 // TODO: add styles
+
+.config-editor {
+    position: relative;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+
+    .title {
+        margin-bottom: 16px;
+    }
+}
+
+.close-button {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+}
+
+
+.start {
+    form {
+        display: flex;
+        flex-direction: column;
+
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+        }
+    }
+
+
+    .query-completed {
+        margin-top: 16px;
+    }
+}
+
+.editor-tab {
+    & > :not(:first-child) {
+        margin-top: 16px;
+    }
+}
+
+
 </style>
 
