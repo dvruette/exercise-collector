@@ -45,7 +45,7 @@ const config: ScraperConfig[] = [
 
     {
         url: 'https://metaphor.ethz.ch/x/2019/fs/401-0212-16L/',
-        baseUrl: '',
+        baseUrl: 'https://metaphor.ethz.ch/x/2019/fs/401-0212-16L/',
         name: 'Analysis I',
         tableConfigs: [
             {

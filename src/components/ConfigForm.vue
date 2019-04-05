@@ -11,7 +11,13 @@
                 <div class="pack">
                     <label><strong>Exercise/lecture name</strong></label>
                     <input v-model="config.name" type="text">
+                    <p>{{ config.url }}</p>
                 </div>
+
+                <!-- <div class="pack">
+                    <label>Link:</label>
+                    <a :href="config.url">{{ config.url }}</a>
+                </div> -->
 
 
                 <div v-for="(conf, index) in config.tableConfigs" :key="index">
@@ -123,7 +129,23 @@ export default class ConfigForm extends Vue {
 
     mounted() {
         this.configString = JSON.stringify(this.config, null, 2)
-        if (this.dom && this.scraper) this.exercise = this.scraper.scrape(this.dom, this.config)
+        this.scrapeDom()
+    }
+
+    @Watch('dom')
+    @Watch('scraper')
+    scrapeDom() {
+        this.scraperError = ''
+
+        if (this.dom && this.scraper) {
+            try {
+                this.exercise = this.scraper.scrape(this.dom, this.config)
+            } catch (error) {
+                this.scraperError = 'Unable to process the current settings. ' +
+                    'Make sure they correspond to the content in the provided URL.'
+                console.error(error)
+            }
+        }
     }
 
     @Watch('tab')
@@ -144,17 +166,7 @@ export default class ConfigForm extends Vue {
     @Watch('config', { deep: true })
     valueChanged() {
         this.$emit('input', this.config)
-        this.scraperError = ''
-
-        if (this.dom && this.scraper) {
-            try {
-                this.exercise = this.scraper.scrape(this.dom, this.config)
-            } catch (error) {
-                this.scraperError = 'Unable to process the current settings. ' +
-                    'Make sure they correspond to the content in the provided URL.'
-                console.error(error)
-            }
-        }
+        this.scrapeDom()
     }
 
     pushTable() {

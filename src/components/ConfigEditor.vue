@@ -98,7 +98,7 @@ export default class ConfigEditor extends Vue {
     queryCompleted: boolean = false
     queriedConfigs: any = []
 
-    tab: string = 'teaser'
+    tab: string = ''
 
     config: ScraperConfig = {
         name: 'Placeholder',
@@ -161,6 +161,8 @@ export default class ConfigEditor extends Vue {
     }
 
     saveConfig() {
+        if (this.scraperError) return
+
         this.firebaseError = ''
         if (!confirm('Is everything working as it should? ' +
             'This config will be stored on a server for others to use as well.')) return
